@@ -1,5 +1,5 @@
-import React from 'react';
-import {TaskType} from "./App";
+import React, {ChangeEvent, KeyboardEvent, useState} from 'react';
+import {FilterValuesType, TaskType} from "./App";
 //rsc
 //typescript =>
 // 1. Variable
@@ -9,37 +9,58 @@ import {TaskType} from "./App";
 type TodoListPropsType = {
     title: string
     tasks: Array<TaskType>
+    addTask: (title: string) => void
+    removeTasks: (taskId: string) => void
+    changeTodoListFilter: (nextFilterValue: FilterValuesType) => void
 }
+
 const TodoList = (props: TodoListPropsType) => {
-    return (
-        <div>
-            <h3>{props.title}</h3>
+    
+        const [title, setTitle] = useState<string>("")
+
+
+        const tasksListItems = props.tasks.map((task) => {
+            const removeTask = () => props.removeTasks(task.id)
+            return (
+                <li key={task.id}>
+                    <input type="checkbox" checked={task.isDone}/>
+                    <span>{task.title}</span>
+                    <button onClick={removeTask}>x</button>
+                </li>
+            )
+        })
+        const addTask = () => {
+            props.addTask(title)
+            setTitle("")
+        }
+        const setLocalTitle = (e: ChangeEvent<HTMLInputElement>) => setTitle(e.currentTarget.value)
+        const onEnterAddTask = (e: KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter") {
+                addTask()
+            }
+        }
+        return (
             <div>
-                <input/>
-                <button>+</button>
+                <h3>{props.title}</h3>
+                <div>
+                    <input
+                        value={title}
+                        onKeyDown={onEnterAddTask}
+                        onChange={setLocalTitle}/>
+                    <button onClick={addTask}>+</button>
+                </div>
+                <ul>
+                    {tasksListItems}
+                </ul>
+                <div>
+                    <button onClick={() => props.changeTodoListFilter("all")}>All</button>
+                    <button onClick={() => props.changeTodoListFilter("active")}>Active</button>
+                    <button onClick={() => props.changeTodoListFilter("completed")}>Completed</button>
+                </div>
             </div>
-            <ul>
-                <li>
-                    <input type="checkbox" checked={props.tasks[0].isDone}/>
-                    <span>{props.tasks[0].title}</span>
-                </li>
-                <li>
-                    <input type="checkbox" checked={props.tasks[1].isDone}/>
-                    <span>{props.tasks[1].title}</span>
-                </li>
-                <li>
-                    <input type="checkbox" checked={props.tasks[2].isDone}/>
-                    <span>{props.tasks[2].title}</span>
-                </li>
-            </ul>
-            <div>
-                <button>All</button>
-                <button>Active</button>
-                <button>Completed</button>
-            </div>
-        </div>
-)
-    ;
-};
+        )
+            ;
+    }
+;
 
 export default TodoList;
